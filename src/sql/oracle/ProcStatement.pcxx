@@ -1,0 +1,96 @@
+#include "jam/sql/proc/ProcStatement.hxx"
+#include "jam/sql/proc/ProcResultSet.hxx"
+#include "jam/sql/SQLException.hxx"
+#include "jam/sql/SQLNotFoundException.hxx"
+#include "jam/lang/Object.hxx"
+#include "jam/lang/Class.hxx"
+#include "jam/lang/String.hxx"
+
+#include <stdio.h>
+
+#include <sqlcpr.h>
+
+using namespace jam::sql;
+using namespace jam::sql::proc;
+using namespace jam::lang;
+
+const Class ProcStatement::klass = Class::newInstance("jam::sql::proc::ProcStatement");
+
+static void throwException(int sqlcode, const char* message, unsigned short length) {
+    throw SQLException::newInstance(sqlcode, String::newInstance(message, length));
+}
+
+static void throwNotFoundException(int sqlcode, const char* message, unsigned short length) {
+    throw SQLNotFoundException::newInstance(sqlcode, String::newInstance(message, length));
+}
+
+EXEC SQL BEGIN DECLARE SECTION;
+    const static char indesc[]  = "input_descriptor";
+    const static char outdesc[] = "output_descriptor";
+EXEC SQL END DECLARE SECTION;
+
+/*** Reference ***/
+
+ProcStatement::ProcStatement() : Statement() {
+    //
+}
+
+ProcStatement::ProcStatement(const Reference& ref) : Statement(ref) {
+    //
+}
+
+ProcStatement::ProcStatement(Implementation* impl) : Statement(impl) {
+    //
+}
+
+ProcStatement::~ProcStatement() {
+    //
+}
+
+ProcStatementImpl& ProcStatement::operator*() {
+    return (ProcStatementImpl&) Statement::operator*();
+}
+
+ProcStatementImpl* ProcStatement::operator->() {
+    return (ProcStatementImpl*) Statement::operator->();
+}
+
+const ProcStatement& ProcStatement::operator=(const Reference& ref) {
+    return (ProcStatement&) Statement::operator=(ref);
+}
+
+const ProcStatement& ProcStatement::operator=(Implementation* impl) {
+    return (ProcStatement&) Statement::operator=(impl);
+}
+
+ProcStatement ProcStatement::newInstance() {
+    return ProcStatement(new ProcStatementImpl());
+}
+
+/*** Implementation ***/
+
+ProcStatementImpl::ProcStatementImpl() {
+    
+}
+
+ProcStatementImpl::~ProcStatementImpl() {
+    //
+}
+
+ProcStatementImpl::ProcStatementImpl(const ProcStatementImpl& copy) {
+    //
+}
+
+#ifdef __DEBUG__
+const char* ProcStatementImpl::debugClassName() {
+    return "jam::sql::proc::ProcStatement";
+}
+#endif
+
+ResultSet ProcStatementImpl::executeQuery() {
+    return null;
+}
+
+void ProcStatementImpl::close() {
+    
+}

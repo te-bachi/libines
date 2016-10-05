@@ -1,0 +1,132 @@
+#include "jam/sql/proc/ProcConnection.hxx"
+#include "jam/sql/proc/ProcStatement.hxx"
+#include "jam/sql/SQLException.hxx"
+#include "jam/sql/SQLNotFoundException.hxx"
+#include "jam/lang/Object.hxx"
+#include "jam/lang/Class.hxx"
+#include "jam/lang/String.hxx"
+
+#include <sqlcpr.h>
+
+using namespace jam::sql;
+using namespace jam::sql::proc;
+using namespace jam::lang;
+
+const Class ProcConnection::klass = Class::newInstance("jam::sql::proc::ProcConnection");
+
+static void throwException(int sqlcode, const char* message, unsigned short length) {
+    throw SQLException::newInstance(sqlcode, String::newInstance(message, length));
+}
+
+static void throwNotFoundException(int sqlcode, const char* message, unsigned short length) {
+    throw SQLNotFoundException::newInstance(sqlcode, String::newInstance(message, length));
+}
+
+/*** Reference ***/
+
+ProcConnection::ProcConnection() : Connection() {
+    //
+}
+
+ProcConnection::ProcConnection(const Reference& ref) : Connection(ref) {
+    //
+}
+
+ProcConnection::ProcConnection(Implementation* impl) : Connection(impl) {
+    //
+}
+
+ProcConnection::~ProcConnection() {
+    //
+}
+
+ProcConnectionImpl& ProcConnection::operator*() {
+    return (ProcConnectionImpl&) Connection::operator*();
+}
+
+ProcConnectionImpl* ProcConnection::operator->() {
+    return (ProcConnectionImpl*) Connection::operator->();
+}
+
+const ProcConnection& ProcConnection::operator=(const Reference& ref) {
+    return (ProcConnection&) Connection::operator=(ref);
+}
+
+const ProcConnection& ProcConnection::operator=(Implementation* impl) {
+    return (ProcConnection&) Connection::operator=(impl);
+}
+
+ProcConnection ProcConnection::newInstance(String username, String password) {
+    return ProcConnection(new ProcConnectionImpl(username, password));
+}
+
+/*** Implementation ***/
+
+ProcConnectionImpl::ProcConnectionImpl() {
+    //
+}
+
+ProcConnectionImpl::ProcConnectionImpl(String username, String password) {
+    EXEC SQL BEGIN DECLARE SECTION;
+        const char* proc_username;
+        const char* proc_password;
+    EXEC SQL END DECLARE SECTION;
+    
+    proc_username = username->toChar();
+    proc_password = password->toChar();
+    
+    EXEC SQL WHENEVER SQLERROR DO throwException(sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc, sqlca.sqlerrm.sqlerrml);
+    EXEC SQL CONNECT :proc_username IDENTIFIED BY :proc_password;
+}
+
+ProcConnectionImpl::~ProcConnectionImpl() {
+    //
+}
+
+ProcConnectionImpl::ProcConnectionImpl(const ProcConnectionImpl& copy) {
+    //
+}
+
+#ifdef __DEBUG__
+const char* ProcConnectionImpl::debugClassName() {
+    return "jam::sql::proc::ProcConnection";
+}
+#endif
+
+void ProcConnectionImpl::commit() {
+    EXEC SQL WHENEVER SQLERROR DO throwException(sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc, sqlca.sqlerrm.sqlerrml);
+    EXEC SQL COMMIT;
+}
+
+void ProcConnectionImpl::rollback() {
+    EXEC SQL WHENEVER SQLERROR DO throwException(sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc, sqlca.sqlerrm.sqlerrml);
+    EXEC SQL ROLLBACK;
+}
+
+void ProcConnectionImpl::close() {
+    
+}
+
+void ProcConnectionImpl::setAutoCommit(boolean autoCommit) {
+    
+}
+
+boolean ProcConnectionImpl::getAutoCommit() {
+    return true;
+}
+
+Statement ProcConnectionImpl::createStatement(String sql) {
+    EXEC SQL BEGIN DECLARE SECTION;
+        const char* proc_sql;
+    EXEC SQL END DECLARE SECTION;
+    
+    proc_sql = sql->toChar();
+    
+    EXEC SQL WHENEVER SQLERROR DO throwException(sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc, sqlca.sqlerrm.sqlerrml);
+    EXEC SQL FOR 100 ALLOCATE DESCRIPTOR GLOBAL 'in';
+    EXEC SQL FOR 100 ALLOCATE DESCRIPTOR GLOBAL 'out';
+    EXEC SQL PREPARE STMT FROM :proc_sql;
+    EXEC SQL DECLARE C CURSOR FOR STMT;
+    
+    return ProcStatement::newInstance();
+}

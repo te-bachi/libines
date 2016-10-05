@@ -1,0 +1,125 @@
+#include "jam/sql/proc/ProcResultSet.hxx"
+#include "jam/sql/proc/ProcResultSetMetaData.hxx"
+#include "jam/lang/Object.hxx"
+#include "jam/lang/Class.hxx"
+#include "jam/lang/String.hxx"
+#include "jam/util/time/Calendar.hxx"
+
+using namespace jam::sql;
+using namespace jam::sql::proc;
+using namespace jam::lang;
+using namespace jam::util::time;
+
+const Class ProcResultSet::klass = Class::newInstance("jam::sql::proc::ProcResultSet");
+
+ProcResultSet::ProcResultSet() : ResultSet() {
+    //
+}
+
+ProcResultSet::ProcResultSet(const Reference& ref) : ResultSet(ref) {
+    //
+}
+
+ProcResultSet::ProcResultSet(Implementation* impl) : ResultSet(impl) {
+    //
+}
+
+ProcResultSet::~ProcResultSet() {
+    //
+}
+
+ProcResultSetImpl& ProcResultSet::operator*() {
+    return (ProcResultSetImpl&) ResultSet::operator*();
+}
+
+ProcResultSetImpl* ProcResultSet::operator->() {
+    return (ProcResultSetImpl*) ResultSet::operator->();
+}
+
+const ProcResultSet& ProcResultSet::operator=(const Reference& ref) {
+    return (ProcResultSet&) ResultSet::operator=(ref);
+}
+
+const ProcResultSet& ProcResultSet::operator=(Implementation* impl) {
+    return (ProcResultSet&) ResultSet::operator=(impl);
+}
+
+ProcResultSet ProcResultSet::newInstance() {
+    return ProcResultSet(new ProcResultSetImpl());
+}
+
+/*** Implementation ***/
+
+ProcResultSetImpl::ProcResultSetImpl() {
+    //
+}
+
+ProcResultSetImpl::~ProcResultSetImpl() {
+    //
+}
+
+ProcResultSetImpl::ProcResultSetImpl(const ProcResultSetImpl& copy) {
+    //
+}
+
+#ifdef __DEBUG__
+const char* ProcResultSetImpl::debugClassName() {
+    return "jam::sql::proc::ProcResultSet";
+}
+#endif
+
+boolean ProcResultSetImpl::next() {
+    return true;
+}
+
+boolean ProcResultSetImpl::previous() {
+    return true;
+}
+
+void ProcResultSetImpl::close() {
+    
+}
+
+ResultSetMetaData ProcResultSetImpl::getMetaData() {
+    return null;
+}
+
+int ProcResultSetImpl::getInteger(int index) {
+    return 0;
+}
+
+int ProcResultSetImpl::getInteger(String column) {
+    return 0;
+}
+
+long ProcResultSetImpl::getLong(int index) {
+    return 0;
+}
+
+long ProcResultSetImpl::getLong(String column) {
+    return 0;
+}
+
+double ProcResultSetImpl::getDouble(int index) {
+    return 0.0;
+}
+
+double ProcResultSetImpl::getDouble(String column) {
+    return 0.0;
+}
+
+String ProcResultSetImpl::getString(int index) {
+    return null;
+}
+
+String ProcResultSetImpl::getString(String column) {
+    return null;
+}
+
+Calendar ProcResultSetImpl::getCalendar(int index) {
+    return null;
+}
+
+Calendar ProcResultSetImpl::getCalendar(String column) {
+    return null;
+}

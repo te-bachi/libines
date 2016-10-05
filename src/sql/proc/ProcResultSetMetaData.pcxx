@@ -1,0 +1,78 @@
+#include "jam/sql/proc/ProcResultSetMetaData.hxx"
+#include "jam/lang/Object.hxx"
+#include "jam/lang/Class.hxx"
+#include "jam/lang/String.hxx"
+
+using namespace jam::sql;
+using namespace jam::sql::proc;
+using namespace jam::lang;
+
+const Class ProcResultSetMetaData::klass = Class::newInstance("jam::sql::proc::ProcResultSetMetaData");
+
+ProcResultSetMetaData::ProcResultSetMetaData() : ResultSetMetaData() {
+    //
+}
+
+ProcResultSetMetaData::ProcResultSetMetaData(const Reference& ref) : ResultSetMetaData(ref) {
+    //
+}
+
+ProcResultSetMetaData::ProcResultSetMetaData(Implementation* impl) : ResultSetMetaData(impl) {
+    //
+}
+
+ProcResultSetMetaData::~ProcResultSetMetaData() {
+    //
+}
+
+ProcResultSetMetaDataImpl& ProcResultSetMetaData::operator*() {
+    return (ProcResultSetMetaDataImpl&) ResultSetMetaData::operator*();
+}
+
+ProcResultSetMetaDataImpl* ProcResultSetMetaData::operator->() {
+    return (ProcResultSetMetaDataImpl*) ResultSetMetaData::operator->();
+}
+
+const ProcResultSetMetaData& ProcResultSetMetaData::operator=(const Reference& ref) {
+    return (ProcResultSetMetaData&) ResultSetMetaData::operator=(ref);
+}
+
+const ProcResultSetMetaData& ProcResultSetMetaData::operator=(Implementation* impl) {
+    return (ProcResultSetMetaData&) ResultSetMetaData::operator=(impl);
+}
+
+/*** Implementation ***/
+
+ProcResultSetMetaDataImpl::ProcResultSetMetaDataImpl() {
+    //
+}
+
+ProcResultSetMetaDataImpl::~ProcResultSetMetaDataImpl() {
+    //
+}
+
+ProcResultSetMetaDataImpl::ProcResultSetMetaDataImpl(const ProcResultSetMetaDataImpl& copy) {
+    //
+}
+
+#ifdef __DEBUG__
+const char* ProcResultSetMetaDataImpl::debugClassName() {
+    return "jam::sql::proc::ProcResultSetMetaData";
+}
+#endif
+
+int ProcResultSetMetaDataImpl::getColumnCount() {
+    return 0;
+}
+
+String ProcResultSetMetaDataImpl::getColumnName(int index) {
+    return null;
+}
+
+int ProcResultSetMetaDataImpl::getColumnType(int index) {
+    return 0;
+}
+
+String ProcResultSetMetaDataImpl::getColumnTypeName(int index) {
+    return null;
+}

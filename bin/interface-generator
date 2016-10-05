@@ -1,0 +1,245 @@
+#!/bin/sh
+
+if [ $# -ne 6 ]; then
+    echo "class-generator <noreplace/replace> <srcdir> <base package> <base class> <derived package> <derived class>"
+    exit 0
+fi
+
+REPLACE=$1
+SOURCE_DIR=$2
+BASE_PACKAGE=$3
+BASE_CLASS=$4
+DERIVED_PACKAGE=$5
+DERIVED_CLASS=$6
+DEFINE=`echo ${DERIVED_CLASS} | sed -e 's/[A-Z]/_&/g' | sed -e 's/^_//g' | tr "[:lower:]" "[:upper:]"`
+
+if [ ! -d ${SOURCE_DIR}/include ]; then
+    echo create directory ${SOURCE_DIR}/include
+    mkdir ${SOURCE_DIR}/include
+fi
+
+if [ ! -d ${SOURCE_DIR}/include/${DERIVED_PACKAGE} ]; then
+    echo create directory ${SOURCE_DIR}/include/${DERIVED_PACKAGE}
+    mkdir ${SOURCE_DIR}/include/${DERIVED_PACKAGE}
+fi
+
+if [ ! -d ${SOURCE_DIR}/src ]; then
+    echo create directory ${SOURCE_DIR}/src
+    mkdir ${SOURCE_DIR}/src
+fi
+
+if [ ! -d ${SOURCE_DIR}/src/${DERIVED_PACKAGE} ]; then
+    echo create directory ${SOURCE_DIR}/src/${DERIVED_PACKAGE}
+    mkdir ${SOURCE_DIR}/src/${DERIVED_PACKAGE}
+fi
+
+###
+### Reference Header
+###
+if [ ${REPLACE} = "replace" -o ! -f ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx ]; then
+    rm -f ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx
+    echo create file ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx
+####### START
+    cat > ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx << __EOF__
+#ifndef __${DEFINE}_HXX__
+#define __${DEFINE}_HXX__
+
+#include "Global.hxx"
+#include "${BASE_PACKAGE}/${BASE_CLASS}.hxx"
+
+namespace ${DERIVED_PACKAGE} {
+__EOF__
+####### END
+    if [ ! ${BASE_PACKAGE} = ${DERIVED_PACKAGE} ]; then
+####### START
+        cat >> ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx << __EOF__
+    using namespace ${BASE_PACKAGE};
+__EOF__
+####### END
+    fi
+    
+####### START
+    cat >> ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx << __EOF__
+    
+    class ${DERIVED_CLASS}Impl;
+    
+    class ${DERIVED_CLASS} : public ${BASE_CLASS} {
+        public:
+            ${DERIVED_CLASS}();
+            ${DERIVED_CLASS}(const Reference& ref);
+            ${DERIVED_CLASS}(Implementation* impl);
+            ${DERIVED_CLASS}(const ${DERIVED_CLASS}& ref);
+            ${DERIVED_CLASS}(${DERIVED_CLASS}Impl* impl);
+            virtual ~${DERIVED_CLASS}();
+            ${DERIVED_CLASS}Impl& operator*();
+            ${DERIVED_CLASS}Impl* operator->();
+            const ${DERIVED_CLASS}& operator=(const Reference& ref);
+            const ${DERIVED_CLASS}& operator=(Implementation* impl);
+            const ${DERIVED_CLASS}& operator=(const ${DERIVED_CLASS}& ref);
+            const ${DERIVED_CLASS}& operator=(${DERIVED_CLASS}Impl* impl);
+    };
+}
+
+#include "${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx"
+
+#endif
+__EOF__
+####### END
+
+else
+    echo ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx exist
+fi
+
+###
+### Implementation Header
+###
+if [ ${REPLACE} = "replace" -o ! -f ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx ]; then
+    rm -f ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx
+    echo create file ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx
+####### START
+    cat > ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx << __EOF__
+#ifndef __${DEFINE}_IMPL_HXX__
+#define __${DEFINE}_IMPL_HXX__
+
+#include "Global.hxx"
+#include "${BASE_PACKAGE}/${BASE_CLASS}Impl.hxx"
+
+namespace ${DERIVED_PACKAGE} {
+__EOF__
+####### END
+
+    if [ ${BASE_PACKAGE} = ${DERIVED_PACKAGE} ]; then
+####### START
+        cat >> ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx << __EOF__
+    using namespace ${BASE_PACKAGE};
+__EOF__
+####### END
+    fi
+    
+####### START
+    cat >> ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx << __EOF__
+    
+    class ${DERIVED_CLASS};
+    
+    class ${DERIVED_CLASS}Impl : public ${BASE_CLASS}Impl {
+        protected:
+            ${DERIVED_CLASS}Impl();
+            virtual ~${DERIVED_CLASS}Impl();
+            
+        private:
+            ${DERIVED_CLASS}Impl(const ${DERIVED_CLASS}Impl& copy);
+    };
+}
+
+#endif
+__EOF__
+####### END
+else
+    echo ${SOURCE_DIR}/include/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx exist
+fi
+
+###
+### Reference Source
+###
+if [ ${REPLACE} = "replace" -o ! -f ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx ]; then
+    rm -f ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx
+    echo create file ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx
+    cat > ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx << __EOF__
+#include "${DERIVED_PACKAGE}/${DERIVED_CLASS}.hxx"
+#include "${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx"
+
+using namespace ${DERIVED_PACKAGE};
+__EOF__
+####### END
+
+    if [ ! ${BASE_PACKAGE} = ${DERIVED_PACKAGE} ]; then
+####### START
+        cat >> ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx << __EOF__
+using namespace ${BASE_PACKAGE};
+__EOF__
+####### END
+    fi
+    
+####### START
+    cat >> ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx << __EOF__
+    
+${DERIVED_CLASS}::${DERIVED_CLASS}() : ${BASE_CLASS}() {
+    //
+}
+
+${DERIVED_CLASS}::${DERIVED_CLASS}(const Reference& ref) : ${BASE_CLASS}(ref) {
+    //
+}
+
+${DERIVED_CLASS}::${DERIVED_CLASS}(Implementation* impl) : ${BASE_CLASS}(impl) {
+    //
+}
+
+${DERIVED_CLASS}::${DERIVED_CLASS}(const ${DERIVED_CLASS}& ref) : ${BASE_CLASS}(ref) {
+    //
+}
+
+${DERIVED_CLASS}::${DERIVED_CLASS}(${DERIVED_CLASS}Impl* impl) : ${BASE_CLASS}(impl) {
+    //
+}
+
+${DERIVED_CLASS}::~${DERIVED_CLASS}() {
+    //
+}
+
+${DERIVED_CLASS}Impl& ${DERIVED_CLASS}::operator*() {
+    return (${DERIVED_CLASS}Impl&) ${BASE_CLASS}::operator*();
+}
+
+${DERIVED_CLASS}Impl* ${DERIVED_CLASS}::operator->() {
+    return (${DERIVED_CLASS}Impl*) ${BASE_CLASS}::operator->();
+}
+
+const ${DERIVED_CLASS}& ${DERIVED_CLASS}::operator=(const Reference& ref) {
+    return (${DERIVED_CLASS}&) ${BASE_CLASS}::operator=(ref);
+}
+
+const ${DERIVED_CLASS}& ${DERIVED_CLASS}::operator=(Implementation* impl) {
+    return (${DERIVED_CLASS}&) ${BASE_CLASS}::operator=(impl);
+}
+
+const ${DERIVED_CLASS}& ${DERIVED_CLASS}::operator=(const ${DERIVED_CLASS}& ref) {
+    return (${DERIVED_CLASS}&) ${BASE_CLASS}::operator=(ref);
+}
+
+const ${DERIVED_CLASS}& ${DERIVED_CLASS}::operator=(${DERIVED_CLASS}Impl* impl) {
+    return (${DERIVED_CLASS}&) ${BASE_CLASS}::operator=(impl);
+}
+
+__EOF__
+else
+    echo ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}.cxx exist
+fi
+
+###
+### Implementation Source
+###
+if [ ${REPLACE} = "replace" -o ! -f ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.cxx ]; then
+    rm -f ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.cxx
+    echo create file ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.cxx
+    cat > ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.cxx << __EOF__
+#include "${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.hxx"
+
+using namespace ${DERIVED_PACKAGE};
+
+${DERIVED_CLASS}Impl::${DERIVED_CLASS}Impl() {
+    //
+}
+
+${DERIVED_CLASS}Impl::~${DERIVED_CLASS}Impl() {
+    //
+}
+
+${DERIVED_CLASS}Impl::${DERIVED_CLASS}Impl(const ${DERIVED_CLASS}Impl& copy) {
+    //
+}
+
+__EOF__
+else
+    echo ${SOURCE_DIR}/src/${DERIVED_PACKAGE}/${DERIVED_CLASS}Impl.cxx exist
+fi
